@@ -11,11 +11,56 @@ const server = express();
 server.use(express.json());
 server.use(helmet());
 
-server.get('/cohorts', (req,res) => {
+
+// POST REQUEST SAVES COHORT TO DB, RETURNS AN ARRAY WITH THE ID OF THE NEWLY-MADE COHORT
+server.post('/api/cohorts', (req, res) => {
+  const name = req.body;
+  if (name.length < 2) {
+    res.status(404).json({ 
+      message: "You forgot to pass a name, silly!"
+    })
+  } else {
+    db.insert(name)
+      .into('cohorts')
+      .then(data => {
+        res.status(201).json(data)
+      })
+      .catch(err => {
+        res.status(500).json({
+          message: "Some useful error message. Your post request is no good" 
+        })
+      })
+  }
+})
+
+// GET REQUEST RETURNS ARRAY OF ALL COHORTS
+server.get('/api/cohorts', (req,res) => {
   db('cohorts')
   .then(data => {
     res.status(200).json(data)
   })
+  .catch(() => {
+    res.status(500).json({ 
+      error: "Some useful error message, since you suck at making get requests" 
+    })
+  })
+})
+
+// GET REQUEST RETURNING THE COHORT OBJECT WITH THE SPECIFIED ID
+server.get('/api/cohorts/:id', (req, res) => {
+  const { id } = req.params;
+  db
+    .select()
+    .from('cohorts')
+    .where({ id })
+    .then(data => {
+      res.status(200).json(data);
+    })
+    .catch(() => {
+      res.status(500).json({ 
+        "error": "Some useful error message, since you suck at making get by ID requests" 
+      })
+    })
 })
 
 const port = 4000;
