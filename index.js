@@ -77,5 +77,28 @@ server.get('/api/cohorts/:id/students', (req, res) => {
     })
 })
 
+// UPDATES COHORT, RETURNs EMPTY if Successful
+server.put('/api/cohorts/:id', (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+})
+
+server.delete('/api/cohorts/:id', (req, res) => {
+  const { id } = req.params;
+  db('cohorts')
+    .where({ id })
+    .del()
+    .then(data => {
+      res.status(200).json({ 
+        "message": `Successfully deleted ${data} record(s)`
+      });
+    })
+    .catch(() => {
+      res.status(500).json({ 
+        "error": "SOMETHING'S WRONG WITH YOUR DELETE YO!" 
+      })
+    })
+})
+
 const port = 4000;
 server.listen(port, () => { console.log(`Running on port ${port}`)})
