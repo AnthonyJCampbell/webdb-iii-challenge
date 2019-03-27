@@ -77,27 +77,44 @@ server.get('/api/cohorts/:id/students', (req, res) => {
     })
 })
 
-// UPDATES COHORT, RETURNs EMPTY if Successful
+// UPDATES COHORT, RETURNS NUMBER OF RECORDS ALTERED
 server.put('/api/cohorts/:id', (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
+    db('cohorts')
+      .where({ id })
+      .update({ name })
+      .then(data => {
+        res.status(202).json(data);
+      })
+      .catch(() => {
+        res.status(500).json({ 
+          "error": "Some useful error message, since you suck at SQLITE" 
+        })
+      })
 })
 
 server.delete('/api/cohorts/:id', (req, res) => {
   const { id } = req.params;
-  db('cohorts')
-    .where({ id })
-    .del()
-    .then(data => {
-      res.status(200).json({ 
-        "message": `Successfully deleted ${data} record(s)`
-      });
+  if(typeof id !== "number") {
+    res.status(404).json({
+      "error": "Hey, you forgot to give me a proper ID!" 
     })
-    .catch(() => {
-      res.status(500).json({ 
-        "error": "SOMETHING'S WRONG WITH YOUR DELETE YO!" 
+  } else {
+    db('cohorts')
+      .where({ id })
+      .del()
+      .then(data => {
+        res.status(200).json({ 
+          "message": `Successfully deleted ${data} record(s)`
+        });
       })
-    })
+      .catch(() => {
+        res.status(500).json({ 
+          "error": "SOMETHING'S WRONG WITH YOUR DELETE YO!" 
+        })
+      })
+  }
 })
 
 const port = 4000;
