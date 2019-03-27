@@ -20,8 +20,8 @@ server.post('/api/cohorts', (req, res) => {
       message: "You forgot to pass a name, silly!"
     })
   } else {
-    db.insert(name)
-      .into('cohorts')
+    db('cohorts')
+      .insert(name)
       .then(data => {
         res.status(201).json(data)
       })
@@ -49,9 +49,7 @@ server.get('/api/cohorts', (req,res) => {
 // GET REQUEST RETURNING THE COHORT OBJECT WITH THE SPECIFIED ID
 server.get('/api/cohorts/:id', (req, res) => {
   const { id } = req.params;
-  db
-    .select()
-    .from('cohorts')
+  db('cohorts')
     .where({ id })
     .then(data => {
       res.status(200).json(data);
@@ -59,6 +57,22 @@ server.get('/api/cohorts/:id', (req, res) => {
     .catch(() => {
       res.status(500).json({ 
         "error": "Some useful error message, since you suck at making get by ID requests" 
+      })
+    })
+})
+
+// GET REQUEST TO RETURN ALL STUDENTS WITH THE SPECCIFIED COHORT_ID
+server.get('/api/cohorts/:id/students', (req, res) => {
+  const { id } = req.params
+  db('cohorts')
+    .join('students', {'students.cohort_id' : 'cohorts.id'})
+    .where('cohort_id', '=', `${id}`)
+    .then(data => {
+      res.status(200).json(data);
+    })
+    .catch(() => {
+      res.status(500).json({ 
+        "error": "Some useful error message, since you suck at SQLITE" 
       })
     })
 })
